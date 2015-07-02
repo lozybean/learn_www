@@ -162,5 +162,87 @@
 	$db -> query('select * from user');
 	echo '<hr>';
 ?>
+<?php
+	//连贯操作
+	class DB1{
+		private $sql = array(
+			"field" => "",
+			"where" => "",
+			"order" => "",
+			"limit" => "",
+			"group" => "",
+			"having" => ""
+		);
+
+		function __call($methodName, $args){
+			$methodName = strtolower($methodName);
+
+			if(array_key_exists($methodName,$this->sql)){
+				$this->sql[$methodName] = $args[0];
+			}else{
+				echo "调用类".get_class($this)."中的方法 $methodName 不存在<br>";
+			}
+
+			return $this;
+		}
+
+		function select(){
+			echo "SELECT FROM {$this->sql['field']} user {$this->sql['where']} {$this->sql['order']} {$this->sql['limit']} {$this->sql['group']} {$this->sql['having']}<br>";
+		}
+	}
+	$db1 = new DB1();
+	$db1 -> field('sex, count(sex)')
+		-> where('where sex in ("男","女")')
+		-> group('group by sex')
+		-> having('having avg(age) > 25')
+		-> select();
+	$db1 -> query('select * from user');
+	//	this function will be __call()
+	echo '<hr>';
+?>
+<?php
+	//Abstract class and interface
+	abstract class MyClass{
+		protected $my_name;
+		protected $my_country;
+
+		function __construct($name="",$country=""){
+			$this->my_name = $name;
+			$this->my_country = $country;
+		}
+
+		abstract function say();
+		abstract function eat();
+	}
+	interface One{
+		const MYCONSTANT = 'CONSTANT value';
+		// it is not good to use const in interface;
+		function func1();
+		function func2();
+	}
+	interface Two{
+		function func3();
+		function func4();
+	}
+	abstract class Three implements One{
+		function func1(){
+			echo 'it is func1 in Three<br>';
+		}
+	}
+	class Four extends Three implements Two{
+		function func2(){
+			echo 'it is func2 in Four<br>';
+		}
+		function func3(){
+			echo 'it is func3 in Four<br>';
+		}
+		function func4(){
+			echo 'it is func4 in Four<br>';
+		}
+	}
+	$oobj = new Four();
+	echo $oobj->func1();
+	echo '<hr>';
+?>
 </body>
 </html>
